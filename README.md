@@ -1,66 +1,35 @@
-# my-app
-angular project
-const filterArrayByMatchingProperty = (
-    array: { [key: string]: string }[], 
-    arrayTofilter: { [key: string]: string }[], 
-    prop: string) => {
-    return arrayTofilter.filter((item) => {
-        return array.some((element) => {
-            return element[prop] === item[prop];
-        });
-    });         
-}
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { DeleteComponent } from './delete.component';
+import { DeleteService } from './delete.service';
 
-// make some tests
-const array = [
-    { id: '1', name: 'John' },
-    { id: '2', name: 'Doe' },
-    { id: '3', name: 'Jane' }
-];
+describe('DeleteComponent', () => {
+  let component: DeleteComponent;
+  let fixture: ComponentFixture<DeleteComponent>;
+  let deleteService: DeleteService;
 
-const arrayToFilter = [
-    { id: '1', name: 'John' },
-    { id: '3', name: 'Jane' }
-];
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      declarations: [DeleteComponent],
+      providers: [DeleteService]
+    });
+    fixture = TestBed.createComponent(DeleteComponent);
+    component = fixture.componentInstance;
+    deleteService = TestBed.inject(DeleteService);
+  });
 
-const result = filterArrayByMatchingProperty(array, arrayToFilter, 'id');
-console.log(result); // [{ id: '1', name: 'John' }, { id: '3', name: 'Jane' }]
+  it('should delete record from grid on click of OK', () => {
+    spyOn(window, 'confirm').and.returnValue(true);
+    const mockId = 'some-id'; // Remplacez par un ID réel
+    spyOn(deleteService, 'deleteRecord').and.returnValue({ subscribe: () => {} });
+    component.deleteRecord(mockId);
+    expect(deleteService.deleteRecord).toHaveBeenCalledWith(mockId);
+  });
 
-// js-helpers.spec.ts
-// import { filterArrayByMatchingProperty } from './js-helpers';
-
-// describe('filterArrayByMatchingProperty', () => {
-//   it('should return items with matching properties', () => {
-//     const array = [
-//       { id: '1', name: 'John' },
-//       { id: '2', name: 'Doe' },
-//       { id: '3', name: 'Jane' }
-//     ];
-//     const arrayToFilter = [
-//       { id: '1', name: 'John' },
-//       { id: '3', name: 'Jane' }
-//     ];
-//     const prop = 'id';
-//     const result = filterArrayByMatchingProperty(array, arrayToFilter, prop);
-//     expect(result).toEqual([
-//       { id: '1', name: 'John' },
-//       { id: '3', name: 'Jane' }
-//     ]);
-//   });
-
-//   it('should return an empty array if no properties match', () => {
-//     const array = [
-//       { id: '1', name: 'John' },
-//       { id: '2', name: 'Doe' },
-//       { id: '3', name: 'Jane' }
-//     ];
-//     const arrayToFilter = [
-//       { id: '4', name: 'John' },
-//       { id: '5', name: 'Jane' }
-//     ];
-//     const prop = 'id';
-//     const result = filterArrayByMatchingProperty(array, arrayToFilter, prop);
-//     expect(result).toEqual([]);
-//   });
-// });
-
+  it('should not delete record from grid on click of Cancel', () => {
+    spyOn(window, 'confirm').and.returnValue(false);
+    const mockId = 'some-id'; // Remplacez par un ID réel
+    spyOn(deleteService, 'deleteRecord');
+    component.deleteRecord(mockId);
+    expect(deleteService.deleteRecord).not.toHaveBeenCalled();
+  });
+});
