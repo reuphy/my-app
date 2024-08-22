@@ -1,7 +1,7 @@
+pacakge.json 
+"proxy-fake-backend": "ng serve --proxy-config proxy.conf.json",
+"fake-backend-server": "node mocks.js",
 
-"scripts": {
-    "mocks": "node mocks.js & ng serve  --proxy-config proxy.conf.json"
-}
 -------------------------------------------------
 proxy.conf.json
 {
