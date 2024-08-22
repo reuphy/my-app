@@ -1,7 +1,18 @@
 
 "scripts": {
-    "mocks": "node mocks.js & ng serve"
+    "mocks": "node mocks.js & ng serve  --proxy-config proxy.conf.json"
 }
+-------------------------------------------------
+proxy.conf.json
+{
+    "/mock/*": {
+      "target": "http://localhost:5000",
+      "pathRewrite": {"^/mock": ""},
+      "secure":"false"
+    }
+}
+
+--------------------------------------------
 
 const http = require('http');
 
