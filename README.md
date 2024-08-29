@@ -1,55 +1,185 @@
-app.module.ts
+<div class="tk-modal {{ overflow }}" *ngIf="isModalDisplayed">
+  <div class="tk-modal-background {{ backgroundcolor }}" (click)="closeOutSideAllowed ? close() : '';"></div>
+  <div class="tk-modal-grid {{ grid }}">
+    <div class="row tk-modal-content p-0 m-0">
+      <div *ngIf="isTopRightCancelBtnDisplayed" class="tk-modal-header m-0">
+        <button class="tk-btn tk-btn-icon tk-btn-no-border tk-btn-modal-close" (click)="close();">
+          <span class="tk-btn-icon-icon">
+            <i class="icon icon-close" aria-hidden="true"></i>
+          </span>
+          <span *ngIf="closeText" class="close-text">{{ closeText }}</span>
+        </button>
+      </div>
+      <div class="col-12 tk-modal-body p-3 p-md-4">
+        <ng-content></ng-content>
+      </div>
+    </div>
+  </div>
+</div>
 
-  providers: [
-   isMock ? fakeBackendProvider : [],
-   isMock2 ? fakeBackendProvider2 : [],
-  ],
-  
-------------------------------
-fakebackend.ts
 
-import { HTTP_INTERCEPTORS, HttpEvent, HttpHandler, HttpInterceptor, HttpRequest, HttpResponse } from "@angular/common/http";
-import { Injectable } from "@angular/core";
-import { delay, Observable, of } from "rxjs";
-import { getMockResponse } from "./mock.helper";
+/* MODAL STYLES
+-------------------------------*/
+.tk-modal-component {
+  /* modals are hidden by default */
+  display: none;
 
-@Injectable()
-export class FakeBackendHttpInterceptor implements HttpInterceptor {
-   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-     return this.handleRequests(req, next);
-   }
- 
-   handleRequests(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-     const { url } = req;
-     const mockResponse = getMockResponse(url);
-     if (mockResponse) {
-       return of(new HttpResponse({ status: 200, body: mockResponse })).pipe(delay(500));
-     }
-     return next.handle(req);
-   }
- }
+  .tk-modal {
+    /* modal container fixed across whole screen */
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: z-index('modal');
+    overflow: auto;
 
-export const fakeBackendProvider = {
-   provide: HTTP_INTERCEPTORS,
-   useClass: FakeBackendHttpInterceptor,
-   multi: true,
-};
+    .tk-modal-grid {
+      position: relative;
+      background: var(--tk-color-primary-white);
+      min-height: 100px;
+      margin: auto;
+      margin-top: 30px;
+      margin-bottom: 30px;
 
--------------------------------
-mock.helper.ts
-
-export function getMockResponse(url: string): any {
- 
-  const mock = {
-    "userId": 1,
-    "id": 1,
-    "title": "test",
-    "completed": false
-  };
-
-    if (url === 'https://jsonplaceholder.typicode.com/todos/1') {
-      return mock;
+      .tk-modal-content {
+        .tk-modal-body {
+          padding: 22px;
+        }
+      }
     }
-    return null;
+
+    @media (max-width: map_get($grid-breakpoints, md)) {
+      .tk-modal-grid {
+        width: 100%;
+        margin: auto;
+      }
+    }
   }
-  -------------------------------
+
+  .tk-modal-background {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background-color: var(--tk-color-primary-black);
+    opacity: 0.75;
+    z-index: -1;
+    cursor: pointer;
+  }
+}
+
+.tk-modal-center {
+  .tk-modal {
+    display: flex;
+  }
+}
+
+.tk-modal-header {
+  position: absolute;
+  right: 0;
+  padding-top: 12px; // tk-btn-icon has already 12px padding top => 24px
+  z-index: 1;
+  @media (max-width: map_get($grid-breakpoints, md)) {
+    padding-top: 4px;
+  }
+}
+
+.tk-btn.tk-btn-modal-close {
+  padding: 0 14px 0 0;
+  flex-direction: column;
+  // Note: the close icon is not following icon design guidelines but
+  // this is what designers want
+  .tk-btn-icon-icon {
+    height: 24px;
+    width: 24px;
+    padding: 5px;
+
+    .icon {
+      height: 14px;
+      width: 14px;
+      font-size: 14px;
+    }
+  }
+  .close-text {
+    margin-top: 4px;
+    font-family: font-family('csePRoman');
+    font-size: 12px;
+    line-height: 16px;
+    @media (max-width: map_get($grid-breakpoints, md)) {
+      display: none;
+    }
+  }
+}
+
+
+import { Component, OnInit, Input, Output, EventEmitter, ElementRef, OnDestroy } from '@angular/core';
+
+@Component({
+  selector: 'tk-modal',
+  templateUrl: './tk-modal.component.html'
+})
+export class TkModalComponent implements OnInit, OnDestroy {
+  isModalDisplayed: boolean = false;
+  @Input() setOverlay101Vh = false;
+  @Input()
+  set display(value: boolean) {
+    value ? this.open() : this.close();
+    this.isModalDisplayed = value;
+  }
+  @Input() closeOutSideAllowed = true;
+
+  // Note: you can only manage col-md grid or higher dimension since, with lower dimensions (sm), the modal takes full screen width.
+  @Input() grid: string = 'col-lg-8 col-md-10'; // default value
+  @Input() backgroundcolor: string = ''; // default value
+  @Input() overflow: string = 'auto'; // default value
+  @Input() closeText?: string;
+  @Input() isTopRightCancelBtnDisplayed: boolean = true;
+  @Input() isStackModalInput: boolean = false;
+  @Output() closeModal = new EventEmitter<boolean>();
+  bodyTopPosition = '';
+  element: any;
+  constructor(private el: ElementRef) {
+    this.element = el.nativeElement;
+  }
+
+  ngOnInit() {
+    // This code will add modal at the end of body elements
+    // Needed to pass over other elements, like header
+  }
+
+  ngOnDestroy() {
+    // We remove the modal from body's children
+    this.close();
+  }
+
+  open() {
+    document.body.appendChild(this.element);
+    this.bodyTopPosition = `-${window.scrollY}px`;
+  //  document.body.style.position = 'fixed';
+    this.element.style.display = 'block';
+    if(this.setOverlay101Vh)
+      document.body.classList.add('tk-modal-open-101vh');
+      else
+      document.body.classList.add('tk-modal-open');
+    
+  }
+
+  close() {
+    if (this.element.style.display === 'block' && !this.isStackModalInput) {
+      this.element.style.display = 'none';
+      const scrollY = this.bodyTopPosition;
+    if(this.setOverlay101Vh)
+      document.body.classList.remove('tk-modal-open-101vh');
+      else
+      document.body.classList.remove('tk-modal-open');
+      this.closeModal.emit();
+      document.body.style.position = '';
+      window.scrollTo(0, parseInt(scrollY || '0') * -1);
+      document.body.removeChild(this.element);
+    }
+      else 
+      this.closeModal.emit();
+  }
+}
