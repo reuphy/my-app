@@ -18,6 +18,8 @@
 </div>
 
 
+// --tk-color-primary-white: #FFFFFF;
+
 /* MODAL STYLES
 -------------------------------*/
 .tk-modal-component {
@@ -36,7 +38,7 @@
 
     .tk-modal-grid {
       position: relative;
-      background: var(--tk-color-primary-white);
+      background: #FFFFFF;
       min-height: 100px;
       margin: auto;
       margin-top: 30px;
@@ -49,12 +51,12 @@
       }
     }
 
-    @media (max-width: map_get($grid-breakpoints, md)) {
+    // @media (max-width: map_get($grid-breakpoints, md)) {
       .tk-modal-grid {
         width: 100%;
         margin: auto;
       }
-    }
+    // }
   }
 
   .tk-modal-background {
@@ -63,7 +65,7 @@
     right: 0;
     bottom: 0;
     left: 0;
-    background-color: var(--tk-color-primary-black);
+    background-color: black;
     opacity: 0.75;
     z-index: -1;
     cursor: pointer;
@@ -81,9 +83,9 @@
   right: 0;
   padding-top: 12px; // tk-btn-icon has already 12px padding top => 24px
   z-index: 1;
-  @media (max-width: map_get($grid-breakpoints, md)) {
-    padding-top: 4px;
-  }
+  // @media (max-width: map_get($grid-breakpoints, md)) {
+  //   padding-top: 4px;
+  // }
 }
 
 .tk-btn.tk-btn-modal-close {
@@ -107,12 +109,11 @@
     font-family: font-family('csePRoman');
     font-size: 12px;
     line-height: 16px;
-    @media (max-width: map_get($grid-breakpoints, md)) {
-      display: none;
-    }
+    // @media (max-width: map_get($grid-breakpoints, md)) {
+    //   display: none;
+    // }
   }
 }
-
 
 import { Component, OnInit, Input, Output, EventEmitter, ElementRef, OnDestroy } from '@angular/core';
 
@@ -183,3 +184,51 @@ export class TkModalComponent implements OnInit, OnDestroy {
       this.closeModal.emit();
   }
 }
+
+
+<h2>Modals</h2>
+<hr>
+<div class="row">
+  <div class="col-lg-2 col-md-4 pb-md-0 pb-2">
+    <button class="tk-btn tk-btn-secondary" (click)="displayModal = !displayModal;">Show</button>
+  </div>
+  <div class="col-lg-2 col-md-4 pb-md-0 pb-2">
+    <h3>Modal</h3>
+  </div>
+  <!-- <div class="col-lg-8 col-md-4">
+    -->
+</div>
+<hr>
+
+<tk-modal 
+  class="tk-modal-component" 
+  [display]="displayModal" 
+  [closeOutSideAllowed]="false" 
+  [closeText]="'Close'" 
+  (closeModal)="displayModal = false">
+  Body
+</tk-modal>
+
+
+<div class="row">
+  <div class="col-lg-2 col-md-4 pb-md-0 pb-2">
+    <button class="tk-btn tk-btn-secondary" (click)="displayModal4 = !displayModal4;">Show</button>
+  </div>
+  <div class="col-lg-2 col-md-4 pb-md-0 pb-2">
+    <h3>Modal</h3>
+    Full width
+  </div>
+  <!-- <div class="col-lg-8 col-md-4">
+   
+  </div> -->
+</div>
+<hr>
+
+<tk-modal 
+  class="tk-modal-component" 
+  [grid]="'col-lg-12 h-100 m-0'" 
+  [display]="displayModal4" 
+  [closeText]="'Close'" 
+  (closeModal)="displayModal4 = false">
+  Body
+</tk-modal>
