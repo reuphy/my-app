@@ -1,3 +1,5 @@
+<tk-switch-toggle (toggleState)="setToggle($event)"></tk-switch-toggle>
+---------------------------------
 <div class="toggle-container" 
     (click)="toggle()"
     [class.bg-white]="!isOn"
