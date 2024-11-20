@@ -1,3 +1,18 @@
+pipe line test :
+stages:
+  - test
+
+test_job:
+  stage: test
+  script:
+    - npm run test -- --no-watch --no-progress --browsers=ChromeHeadless # Exécutez les tests Angular
+    - EXIT_CODE=$? # Capturez le code de sortie
+    - if [ $EXIT_CODE -eq 42 ]; then echo "Flaky test detected. Retrying..."; exit 1; fi # Si le code de sortie est 42, échouez le job pour redémarrer
+    - if [ $EXIT_CODE -ne 0 ]; then exit $EXIT_CODE; fi # Si le code de sortie est différent de 0, échouez sans retry
+  retry:
+    max: 3
+    when: failed
+---------------------------
 <h2>Modals</h2>
 <hr>
 <div class="row">
