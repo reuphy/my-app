@@ -1,17 +1,53 @@
 pipe line test :
-stages:
-  - test
+#!/bin/sh
 
-test_job:
-  stage: test
-  script:
-    - npm run test -- --no-watch --no-progress --browsers=ChromeHeadless # Exécutez les tests Angular
-    - EXIT_CODE=$? # Capturez le code de sortie
-    - if [ $EXIT_CODE -eq 42 ]; then echo "Flaky test detected. Retrying..."; exit 1; fi # Si le code de sortie est 42, échouez le job pour redémarrer
-    - if [ $EXIT_CODE -ne 0 ]; then exit $EXIT_CODE; fi # Si le code de sortie est différent de 0, échouez sans retry
-  retry:
-    max: 3
-    when: failed
+# Lire la version actuelle du package.json
+CURRENT_VERSION=$(sed -n 's/.*"version": "\(.*\)",/\1/p' package.json)
+
+# Supprimer le suffixe "-snapshot"
+RELEASE_VERSION=$(echo $CURRENT_VERSION | sed 's/-snapshot//')
+
+# Incrémenter la version en fonction du type de versionnage (patch, minor, major)
+increment_version() {
+  local version=$1
+  local part=$2
+  local major=$(echo $version | cut -d. -f1)
+  local minor=$(echo $version | cut -d. -f2)
+  local patch=$(echo $version | cut -d. -f3)
+
+  case $part in
+    "patch")
+      patch=$((patch + 1))
+      ;;
+    "minor")
+      minor=$((minor + 1))
+      patch=0
+      ;;
+    "major")
+      major=$((major + 1))
+      minor=0
+      patch=0
+      ;;
+    *)
+      echo "Invalid version part: $part"
+      exit 1
+  esac
+
+  echo "$major.$minor.$patch"
+}
+
+# Exécuter la fonction en fonction de l'argument fourni
+RELEASE_VERSION=$(increment_version $RELEASE_VERSION $1)
+
+#Utilisez sed pour parcourir le fichier JSON et remplacer la valeur de "version" :
+sed -i "s/\"version\": \"[^\"]*\",/\"version\": \"$RELEASE_VERSION-SNAPHOT\",/" package.json
+
+echo "RELEASE_VERSION : $RELEASE_VERSION"
+
+NEXT_VERSION=$(increment_version $RELEASE_VERSION $1)-SNAPHOT
+
+echo "NEXT_VERSION : $NEXT_VERSION"
+
 ---------------------------
 <h2>Modals</h2>
 <hr>
