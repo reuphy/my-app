@@ -1,4 +1,62 @@
-}); it('should test the value of the BehaviorSubject', (done) => { const mockData1 = { key1: 'value1' }; const mockData2 = { key2: 'value2' }; spyOn(dataService, 'getData1').and.returnValue(of(mockData1)); spyOn(dataService, 'getData2').and.returnValue(of(mockData2)); spyOn(dataService, 'processData').and.callThrough(); component.fetchData(); dataService.getDataSubject().subscribe(value => { expect(value).toEqual({ key1: 'VALUE1', key2: 'VALUE2' }); done(); }); expect(dataService.processData).toHaveBeenCalled(); }); 
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { of } from 'rxjs';
+import { MyComponent } from './my.component';
+import { DataService } from './data.service';
+
+describe('MyComponent', () => {
+  let component: MyComponent;
+  let fixture: ComponentFixture<MyComponent>;
+  let dataService: DataService;
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      declarations: [MyComponent],
+      providers: [DataService]
+    }).compileComponents();
+  });
+
+  beforeEach(() => {
+    fixture = TestBed.createComponent(MyComponent);
+    component = fixture.componentInstance;
+    dataService = TestBed.inject(DataService);
+    fixture.detectChanges();
+  });
+
+  it('should create', () => {
+    expect(component).toBeTruthy();
+  });
+
+  it('should get data from the service and set it to the component', () => {
+    const mockData1 = { key1: 'value1' };
+    const mockData2 = { key2: 'value2' };
+    spyOn(dataService, 'getData1').and.returnValue(of(mockData1));
+    spyOn(dataService, 'getData2').and.returnValue(of(mockData2));
+    spyOn(dataService, 'processData').and.callThrough();
+
+    component.fetchData();
+
+    expect(dataService.processData).toHaveBeenCalled();
+    expect(component.data).toEqual({ key1: 'VALUE1', key2: 'VALUE2' });
+  });
+
+  it('should test the value of the BehaviorSubject', (done) => {
+    const mockData1 = { key1: 'value1' };
+    const mockData2 = { key2: 'value2' };
+    spyOn(dataService, 'getData1').and.returnValue(of(mockData1));
+    spyOn(dataService, 'getData2').and.returnValue(of(mockData2));
+    spyOn(dataService, 'processData').and.callThrough();
+
+    component.fetchData();
+
+    dataService.getDataSubject().subscribe(value => {
+      expect(value).toEqual({ key1: 'VALUE1', key2: 'VALUE2' });
+      done();
+    });
+
+    expect(dataService.processData).toHaveBeenCalled();
+  });
+});
+
 ---------------------------
 <h2>Modals</h2>
 <hr>
