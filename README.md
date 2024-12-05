@@ -1,3 +1,41 @@
+import { Component, OnInit } from '@angular/core';
+import { BehaviorSubject } from 'rxjs';
+import { DataService } from './data.service';
+
+@Component({
+  selector: 'app-my-component',
+  template: '<div>{{ data | json }}</div>'
+})
+export class MyComponent implements OnInit {
+  data: any;
+  dataSubject = new BehaviorSubject<any>(null);
+
+  constructor(private dataService: DataService) {}
+
+  ngOnInit(): void {
+    this.fetchData();
+  }
+
+  fetchData(): void {
+    this.dataService.processData().subscribe(result => {
+      const upperCasedData = this.convertToUpperCase(result);
+      this.dataSubject.next(upperCasedData);
+      this.data = upperCasedData;
+    });
+  }
+
+  private convertToUpperCase(data: any): any {
+    const upperCasedData = {};
+    for (const key in data) {
+      if (data.hasOwnProperty(key)) {
+        upperCasedData[key] = typeof data[key] === 'string' ? data[key].toUpperCase() : data[key];
+      }
+    }
+    return upperCasedData;
+  }
+}
+
+
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
 import { MyComponent } from './my.component';
@@ -39,7 +77,7 @@ describe('MyComponent', () => {
     expect(component.data).toEqual({ key1: 'VALUE1', key2: 'VALUE2' });
   });
 
-  it('should test the value of the BehaviorSubject', (done) => {
+  it('should test the value of the BehaviorSubject in the component', (done) => {
     const mockData1 = { key1: 'value1' };
     const mockData2 = { key2: 'value2' };
     spyOn(dataService, 'getData1').and.returnValue(of(mockData1));
@@ -48,7 +86,7 @@ describe('MyComponent', () => {
 
     component.fetchData();
 
-    dataService.getDataSubject().subscribe(value => {
+    component.dataSubject.subscribe(value => {
       expect(value).toEqual({ key1: 'VALUE1', key2: 'VALUE2' });
       done();
     });
@@ -56,6 +94,7 @@ describe('MyComponent', () => {
     expect(dataService.processData).toHaveBeenCalled();
   });
 });
+
 
 ---------------------------
 <h2>Modals</h2>
