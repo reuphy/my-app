@@ -1,99 +1,56 @@
-import { Component, OnInit } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
-import { DataService } from './data.service';
-
-@Component({
-  selector: 'app-my-component',
-  template: '<div>{{ data | json }}</div>'
-})
-export class MyComponent implements OnInit {
-  data: any;
-  dataSubject = new BehaviorSubject<any>(null);
-
-  constructor(private dataService: DataService) {}
-
-  ngOnInit(): void {
-    this.fetchData();
-  }
-
-  fetchData(): void {
-    this.dataService.processData().subscribe(result => {
-      const upperCasedData = this.convertToUpperCase(result);
-      this.dataSubject.next(upperCasedData);
-      this.data = upperCasedData;
-    });
-  }
-
-  private convertToUpperCase(data: any): any {
-    const upperCasedData = {};
-    for (const key in data) {
-      if (data.hasOwnProperty(key)) {
-        upperCasedData[key] = typeof data[key] === 'string' ? data[key].toUpperCase() : data[key];
-      }
+    getdata(data: number): Observable<any> {
+      return this.http.get<any>(`https://jsonplaceholder.typicode.com/users/${data}`);
     }
-    return upperCasedData;
-  }
-}
 
+    test() {
+      const req = [
+        {
+          "userId": 1,
+          "id": 2,
+          "title": "delectus aut autem",
+          "completed": false
+        },
+        {
+          "userId": 1,
+          "id": 1,
+          "title": "quis ut nam facilis et officia qui",
+          "completed": false
+        },
+        {
+          "userId": 1,
+          "id": 3,
+          "title": "fugiat veniam minus",
+          "completed": false
+        },
+        {
+          "userId": 1,
+          "id": 4,
+          "title": "et porro tempora",
+          "completed": true
+        }
+      ]
+      
+      .map(data =>
+        this.getdata(data.id).pipe(
+          map(details => {
+            return {
+              id: data.id,
+              name: details.name,
+              title: data.title
+            };
+          })
+        )
+      );
+  
+      return forkJoin(req)
+    }
 
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { of } from 'rxjs';
-import { MyComponent } from './my.component';
-import { DataService } from './data.service';
+    ngOnInit(): void {
+      this.test().subscribe(data => {
+        console.log('data ', data);
+      });    
 
-describe('MyComponent', () => {
-  let component: MyComponent;
-  let fixture: ComponentFixture<MyComponent>;
-  let dataService: DataService;
-
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      declarations: [MyComponent],
-      providers: [DataService]
-    }).compileComponents();
-  });
-
-  beforeEach(() => {
-    fixture = TestBed.createComponent(MyComponent);
-    component = fixture.componentInstance;
-    dataService = TestBed.inject(DataService);
-    fixture.detectChanges();
-  });
-
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
-  it('should get data from the service and set it to the component', () => {
-    const mockData1 = { key1: 'value1' };
-    const mockData2 = { key2: 'value2' };
-    spyOn(dataService, 'getData1').and.returnValue(of(mockData1));
-    spyOn(dataService, 'getData2').and.returnValue(of(mockData2));
-    spyOn(dataService, 'processData').and.callThrough();
-
-    component.fetchData();
-
-    expect(dataService.processData).toHaveBeenCalled();
-    expect(component.data).toEqual({ key1: 'VALUE1', key2: 'VALUE2' });
-  });
-
-  it('should test the value of the BehaviorSubject in the component', (done) => {
-    const mockData1 = { key1: 'value1' };
-    const mockData2 = { key2: 'value2' };
-    spyOn(dataService, 'getData1').and.returnValue(of(mockData1));
-    spyOn(dataService, 'getData2').and.returnValue(of(mockData2));
-    spyOn(dataService, 'processData').and.callThrough();
-
-    component.fetchData();
-
-    component.dataSubject.subscribe(value => {
-      expect(value).toEqual({ key1: 'VALUE1', key2: 'VALUE2' });
-      done();
-    });
-
-    expect(dataService.processData).toHaveBeenCalled();
-  });
-});
+    }
 
 
 ---------------------------
