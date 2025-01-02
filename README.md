@@ -1,56 +1,50 @@
-    getdata(data: number): Observable<any> {
-      return this.http.get<any>(`https://jsonplaceholder.typicode.com/users/${data}`);
-    }
+interface Todo {
+  userId: number;
+  id: number;
+  title: string;
+  completed: boolean;
+}
 
-    test() {
-      const req = [
-        {
-          "userId": 1,
-          "id": 2,
-          "title": "delectus aut autem",
-          "completed": false
-        },
-        {
-          "userId": 1,
-          "id": 1,
-          "title": "quis ut nam facilis et officia qui",
-          "completed": false
-        },
-        {
-          "userId": 1,
-          "id": 3,
-          "title": "fugiat veniam minus",
-          "completed": false
-        },
-        {
-          "userId": 1,
-          "id": 4,
-          "title": "et porro tempora",
-          "completed": true
-        }
-      ]
-      
-      .map(data =>
-        this.getdata(data.id).pipe(
-          map(details => {
-            return {
-              id: data.id,
-              name: details.name,
-              title: data.title
-            };
-          })
-        )
-      );
-  
-      return forkJoin(req)
-    }
+interface User {
+  id: number;
+  name: string;
+}
 
-    ngOnInit(): void {
-      this.test().subscribe(data => {
-        console.log('data ', data);
-      });    
+getData(userId: number): Observable<User> {
+  return this.http.get<User>(`https://jsonplaceholder.typicode.com/users/${userId}`);
+}
 
-    }
+transformData(todo: Todo, user: User): any {
+  return {
+    id: todo.id,
+    name: user.name,
+    title: todo.title
+  };
+}
+
+test(): Observable<any[]> {
+  const todos: Todo[] = [
+    { userId: 1, id: 2, title: "delectus aut autem", completed: false },
+    { userId: 1, id: 1, title: "quis ut nam facilis et officia qui", completed: false },
+    { userId: 1, id: 3, title: "fugiat veniam minus", completed: false },
+    { userId: 1, id: 4, title: "et porro tempora", completed: true }
+  ];
+
+  const observables = todos.map(todo => 
+    this.getData(todo.id).pipe(
+      map(user => this.transformData(todo, user))
+    )
+  );
+
+  return forkJoin(observables);
+}
+
+ngOnInit(): void {
+  this.test().subscribe(data => {
+    console.log('data ', data);
+  });    
+}
+
 
 
 ---------------------------
