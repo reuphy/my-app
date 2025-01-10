@@ -1,51 +1,14 @@
-interface Todo {
-  userId: number;
-  id: number;
-  title: string;
-  completed: boolean;
-}
+<div (keydown)="onKeydown($event)" (mouseenter)="copyToClipboard()">   
+    <p>{{ number }}</p>
+    <input #myInput type="text" placeholder="Cliquez sur le bouton pour copier">
+</div>
+  <button (click)="increment()">Copier coler </button>
 
-interface User {
-  id: number;
-  name: string;
-}
-
-getData(userId: number): Observable<User> {
-  return this.http.get<User>(`https://jsonplaceholder.typicode.com/users/${userId}`);
-}
-
-transformData(todo: Todo, user: User): any {
-  return {
-    id: todo.id,
-    name: user.name,
-    title: todo.title
-  };
-}
-
-test(): Observable<any[]> {
-  const todos: Todo[] = [
-    { userId: 1, id: 2, title: "delectus aut autem", completed: false },
-    { userId: 1, id: 1, title: "quis ut nam facilis et officia qui", completed: false },
-    { userId: 1, id: 3, title: "fugiat veniam minus", completed: false },
-    { userId: 1, id: 4, title: "et porro tempora", completed: true }
-  ];
-
-  const observables = todos.map(todo => 
-    this.getData(todo.id).pipe(
-      map(user => this.transformData(todo, user))
-    )
-  );
-
-  return forkJoin(observables);
-}
-
-ngOnInit(): void {
-  this.test().subscribe(data => {
-    console.log('data ', data);
-  });    
-}
-
-
+ onKeydown(event: KeyboardEvent): void { 
+    if (event.ctrlKey) {
+      this.copyToClipboard();
+    }
+  } 
 
 ---------------------------
 <h2>Modals</h2>
