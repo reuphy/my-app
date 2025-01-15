@@ -1,15 +1,28 @@
-<div (keydown)="onKeydown($event)" (mouseenter)="copyToClipboard()">   
-    <p>{{ number }}</p>
-    <input #myInput type="text" placeholder="Cliquez sur le bouton pour copier">
-</div>
-  <button (click)="increment()">Copier coler </button>
+  http = inject(HttpClient);
+  comments$: Observable<Comment[]> = this.http
+    .get<Comment[]>('http://localhost:3004/comments')
+    .pipe(
+      catchError(() => {
+        return of([]);
+      }),
+    );
 
- onKeydown(event: KeyboardEvent): void { 
-    if (event.ctrlKey) {
-      this.copyToClipboard();
-    }
-  } 
+  // comments: Comment[] = [];
+  // constructor() {
+  //   this.http.get<Comment[]>('http://localhost:3004/comments').subscribe({
+  //     next: (comments) => {
+  //       this.comments = comments;
+  //     },
+  //     error: (err) => {
+  //       // console.log('err', err);
+  //       this.comments = [];
+  //     },
+  //   });
+  // }
 
+  @for (comment of comments$ | async; track $index) {
+  <div>{{ comment.body }}</div>
+}
 ---------------------------
 <h2>Modals</h2>
 <hr>
