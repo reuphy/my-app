@@ -19,7 +19,10 @@
   //     },
   //   });
   // }
-
+  
+<div *ngIf="comments$ | async as data">
+  {{ data }}
+</div>
   @for (comment of comments$ | async; track $index) {
   <div>{{ comment.body }}</div>
 }
